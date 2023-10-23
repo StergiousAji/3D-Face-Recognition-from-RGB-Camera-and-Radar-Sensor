@@ -14,74 +14,74 @@ from scipy.stats import mode
 
 
 
-import tensorflow as tf
-from tensorflow.keras.layers import TimeDistributed, Conv2D, MaxPooling2D, Dropout, LSTM, Dense, Flatten
+# import tensorflow as tf
+# from tensorflow.keras.layers import TimeDistributed, Conv2D, MaxPooling2D, Dropout, LSTM, Dense, Flatten
 
-# Seed value (can actually be different for each attribution step)
-seed_value= 0
+# # Seed value (can actually be different for each attribution step)
+# seed_value= 0
 
-# 1. Set `PYTHONHASHSEED` environment variable at a fixed value
-import os
-os.environ['PYTHONHASHSEED']=str(seed_value)
+# # 1. Set `PYTHONHASHSEED` environment variable at a fixed value
+# import os
+# os.environ['PYTHONHASHSEED']=str(seed_value)
 
-# 2. Set `python` built-in pseudo-random generator at a fixed value
-import random
-random.seed(seed_value)
+# # 2. Set `python` built-in pseudo-random generator at a fixed value
+# import random
+# random.seed(seed_value)
 
-# 3. Set `numpy` pseudo-random generator at a fixed value
-import numpy as np
-np.random.seed(seed_value)
+# # 3. Set `numpy` pseudo-random generator at a fixed value
+# import numpy as np
+# np.random.seed(seed_value)
 
-# 4. Set `tensorflow` pseudo-random generator at a fixed value
-tf.random.set_seed(seed_value)
+# # 4. Set `tensorflow` pseudo-random generator at a fixed value
+# tf.random.set_seed(seed_value)
 
-# 5. Configure a new global `tensorflow` session
-from keras import backend as K
-session_conf = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
-K.set_session(sess)
-
-
-model = tf.keras.Sequential([
-    tf.keras.layers.Conv2D(filters=128, kernel_size=3, activation='relu', input_shape=(60, 16, 3)),
-    #tf.keras.layers.Conv2D(filters=128, kernel_size=3, activation='relu'),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(1, activation='sigmoid')
-])
-
-STEPS_PER_EPOCH = 5400//32
-lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
-  0.001,
-  decay_steps=STEPS_PER_EPOCH*1000,
-  decay_rate=1,
-  staircase=False)
-
-def get_optimizer():
-  return tf.keras.optimizers.Adam(lr_schedule)
-
-optimizer = get_optimizer()
-
-model.compile(optimizer=optimizer,
-              loss=tf.keras.losses.BinaryCrossentropy(),
-              metrics=['accuracy'])
-
-callbacks = [
-    tf.keras.callbacks.ModelCheckpoint(
-        # Path where to save the model
-        # The two parameters below mean that we will overwrite
-        # the current checkpoint if and only if
-        # the `val_loss` score has improved.
-        # The saved model name will include the current epoch.
-        filepath="mymodel_{epoch}",
-        save_best_only=True,  # Only save a model if `val_loss` has improved.
-        monitor="val_accuracy",
-        verbose=1,
-    )
-]
+# # 5. Configure a new global `tensorflow` session
+# from keras import backend as K
+# session_conf = tf.compat.v1.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+# sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=session_conf)
+# K.set_session(sess)
 
 
-model = tf.keras.models.load_model('/home/elle/soli_logger/python/mymodel_22')
+# model = tf.keras.Sequential([
+#     tf.keras.layers.Conv2D(filters=128, kernel_size=3, activation='relu', input_shape=(60, 16, 3)),
+#     #tf.keras.layers.Conv2D(filters=128, kernel_size=3, activation='relu'),
+#     tf.keras.layers.Flatten(),
+#     tf.keras.layers.Dense(64, activation='relu'),
+#     tf.keras.layers.Dense(1, activation='sigmoid')
+# ])
+
+# STEPS_PER_EPOCH = 5400//32
+# lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
+#   0.001,
+#   decay_steps=STEPS_PER_EPOCH*1000,
+#   decay_rate=1,
+#   staircase=False)
+
+# def get_optimizer():
+#   return tf.keras.optimizers.Adam(lr_schedule)
+
+# optimizer = get_optimizer()
+
+# model.compile(optimizer=optimizer,
+#               loss=tf.keras.losses.BinaryCrossentropy(),
+#               metrics=['accuracy'])
+
+# callbacks = [
+#     tf.keras.callbacks.ModelCheckpoint(
+#         # Path where to save the model
+#         # The two parameters below mean that we will overwrite
+#         # the current checkpoint if and only if
+#         # the `val_loss` score has improved.
+#         # The saved model name will include the current epoch.
+#         filepath="mymodel_{epoch}",
+#         save_best_only=True,  # Only save a model if `val_loss` has improved.
+#         monitor="val_accuracy",
+#         verbose=1,
+#     )
+# ]
+
+
+# model = tf.keras.models.load_model('/home/elle/soli_logger/python/mymodel_22')
 
 
 from soli_logging import SoliLogParser, get_crd_data_bin, plot_crd_data, get_rp_data_bin, get_crd_data

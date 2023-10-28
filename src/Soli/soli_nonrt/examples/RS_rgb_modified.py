@@ -32,14 +32,20 @@ import socket
 def config():
     print("Executing image Task on Process {}".format(os.getpid()))
     config = rs.config()
-    #config.enable_stream(rs.stream.depth, 480, 270, rs.format.any, 60) #Params: stream, resolution_x, resolution_y, module, frame rate
+    # config.enable_stream(rs.stream.depth, 480, 270, rs.format.any, 60) #Params: stream, resolution_x, resolution_y, module, frame rate
+
+    # TODO: MIGHT CHANGE TO rs.stream.color for RGB instead of depth
     config.enable_stream(rs.stream.color, 640, 480, rs.format.any, 30) #Params: stream, resolution_x, resolution_y, module, frame rate
     
     #Create a pipeline, which is an object with the try_wait_for_frames() method
     global pipeline 
     pipeline = rs.pipeline()
     profile = pipeline.start(config)
-    
+
+    #Find the scaling from depth values of pixels to metres
+    depth_sensor = profile.get_device().first_depth_sensor()
+    global depth_scale
+    depth_scale = depth_sensor.get_depth_scale()
     
     print("Configured")
     
@@ -49,11 +55,15 @@ def grab_frames():
     time_2 = 0
     
     #Set the number of frames to capture. Ideally, this should match the length of time for which the 
-    #SOLI will run. E.g. if the SOLI acquires frames over 20s, and the IRS is set to 15 FPS, we want 300 frames
-    frame_number = 60*60
+    #SOLI will run. E.g. if the SOLI acquires frames over 20s, and the IRS is set to 30 FPS, we want 300 frames
+    frame_number = 10*60
     
     #Instantiate empty array for depth frames
-    depth_frames_list = np.zeros((frame_number,54,96))
+    # depth_frames_list = np.zeros((frame_number,54,96))
+
+    # TODO: MAY NOT NEED TO QUANTISE PIXELS
+    depth_frames_list = np.zeros((frame_number, 96, 128, 3))
+    
     timestamps = np.zeros((frame_number,2))
     print("Grabbing frames...")
     try:   
@@ -67,15 +77,26 @@ def grab_frames():
                 #print('Frame',i,'device time difference',frames.timestamp-time_1,'system time difference',(time.time()-time_2)*1e3)
                 #time_1 = frames.timestamp  
                 #time_2 = time.time()
-                
+
             frames = pipeline.wait_for_frames()
-            image = np.asanyarray(frames[0].data)#the depth frames are in units of m      
-            print(image.shape,image.dtype) 
-            cv2.imshow('image',image)
+            depth_frames_list[i] = depth_scale*np.asanyarray(frames[0].data).astype('float16')[::5, ::5] #the depth frames are in units of m       
+            timestamps[i,0] = frames.timestamp
+            timestamps[i,1] = time.time()
+            print('Frame',i,'device time difference',frames.timestamp-time_1,'system time difference',(time.time()-time_2)*1e3)
+            time_1 = frames.timestamp  
+            time_2 = time.time()
+            cv2.imshow('image',depth_frames_list[i])
             cv2.waitKey(1)
+                
+            # frames = pipeline.wait_for_frames()
+            # image = np.asanyarray(frames[0].data)#the depth frames are in units of m      
+            # print(image.shape,image.dtype) 
+            # cv2.imshow('image',image)
+            # cv2.waitKey(1)
 	    
     finally:
         pipeline.stop()
+        # TODO: ADD CUSTOM PATH
         np.save('../data/images.npy',depth_frames_list)
         np.save('../data/image_timestamps.npy',timestamps)
 #config()  

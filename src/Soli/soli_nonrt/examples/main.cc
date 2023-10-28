@@ -115,7 +115,8 @@ int main(int argc, char *argv[]) {
 	//valread = read( sock , buffer, 1024);
 	//printf("%s\n",buffer );
     
-    	//Soli part
+    //Soli part
+	// TODO: ADD CUSTOM PATH
 	file.open("../data/radar.json");
 	file << "{\"bursts\":[";
 
@@ -125,12 +126,12 @@ int main(int argc, char *argv[]) {
 	// Initialize the radar sensor with the default configuration.
 	soli.Init();
 
-	// Customize the chirps per burst and samples per chirp.
-	soli.SetConfig("chirps_per_burst", 16);
-	soli.SetConfig("samples_per_chirp", 128);
-	soli.SetConfig("lower_freq", 59000);
-	soli.SetConfig("upper_freq", 61000);
+	// Customize the chirps per burst and samples per chirp. SET TO SHORTRANGE
+	soli.SetConfig("lower_freq", 58000);
+	soli.SetConfig("upper_freq", 63500);
 	soli.SetConfig("chirp_rate", 2000);
+	soli.SetConfig("chirps_per_burst", 64);
+	soli.SetConfig("samples_per_chirp", 16);
 	// Reset the sensor as we have changed the config.
 	soli.Reset();
 
@@ -145,7 +146,7 @@ int main(int argc, char *argv[]) {
 	printf("Ready message sent\n");
 	
 	// Run for a few seconds, then stop.
-	std::this_thread::sleep_for(std::chrono::seconds(60));
+	std::this_thread::sleep_for(std::chrono::seconds(10));
 	soli.Stop();
 	
 	send(sock , complete , strlen(complete) , 0 );

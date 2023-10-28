@@ -56,6 +56,6 @@ def plot_crd_image_data(crd_data,image_data,path,start=0):
         cbar.set_label('depth (m)',rotation=270, labelpad=15)
         plt.tight_layout()
         plt.grid(False)
-        plt.savefig(r"{}/img{}.png".format(path,i+start))
+        # plt.savefig(r"{}/img{}.png".format(path,i+start))
         #plt.show()    
         plt.close()

@@ -99,7 +99,7 @@ def get_crd_data(json_data, clutter_coeff=0.9, num_chirps_per_burst=16):
     result = np.roll(result, result.shape[3]//2, axis=3)
     return result
 
-def plot_crd_data(crd_data,path):
+def plot_crd_data(crd_data, path=""):
     num_channels=crd_data.shape[1]
     for i,frame_crd in enumerate(crd_data):
         print(i)
@@ -119,6 +119,6 @@ def plot_crd_data(crd_data,path):
 
         plt.tight_layout()
         plt.grid(False)
-        plt.savefig(r"{}/img{}.png".format(path,i))
-        #plt.show()    
-        plt.close()
+        # plt.savefig(r"{}/img{}.png".format(path,i))
+        plt.show()
+        # plt.close()

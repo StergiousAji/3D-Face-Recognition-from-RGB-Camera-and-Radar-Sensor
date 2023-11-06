@@ -32,12 +32,13 @@ import socket
 def config():
     print("Executing image Task on Process {}".format(os.getpid()))
     config = rs.config()
-    # config.enable_stream(rs.stream.depth, 480, 270, rs.format.any, 60) #Params: stream, resolution_x, resolution_y, module, frame rate
 
-    # TODO: MIGHT CHANGE TO rs.stream.color for RGB instead of depth
-    config.enable_stream(rs.stream.color, 640, 480, rs.format.any, 30) #Params: stream, resolution_x, resolution_y, module, frame rate
+    # TODO: MIGHT CHANGE TO rs.stream.color for RGB instead of depth rs.format.any
+    # Params: stream, resolution_x, resolution_y, module, frame rate
+    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30) 
+    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
     
-    #Create a pipeline, which is an object with the try_wait_for_frames() method
+    # Create a pipeline, which is an object with the try_wait_for_frames() method
     global pipeline 
     pipeline = rs.pipeline()
     profile = pipeline.start(config)
@@ -56,36 +57,44 @@ def grab_frames():
     
     #Set the number of frames to capture. Ideally, this should match the length of time for which the 
     #SOLI will run. E.g. if the SOLI acquires frames over 20s, and the IRS is set to 30 FPS, we want 300 frames
-    frame_number = 10*60
+    frame_number = 10*30
     
     #Instantiate empty array for depth frames
     # depth_frames_list = np.zeros((frame_number,54,96))
 
     # TODO: MAY NOT NEED TO QUANTISE PIXELS
-    depth_frames_list = np.zeros((frame_number, 96, 128, 3))
+    depth_frames_list = np.zeros((frame_number, 640, 480, 3))
+
+    # TODO: CLIP BACKGROUND
+    clipping_distance_in_meters = 1 #1 meter
+    clipping_distance = clipping_distance_in_meters / depth_scale
     
     timestamps = np.zeros((frame_number,2))
     print("Grabbing frames...")
     try:   
        for i in range(frame_number):        
-            #_,frames = pipeline.try_wait_for_frames()
-            #if _ == True:
-
-                #depth_frames_list[i] = depth_scale*np.asanyarray(frames[0].data).astype('float16') #the depth frames are in units of m       
-                #timestamps[i,0] = frames.timestamp
-                #timestamps[i,1] = time.time()
-                #print('Frame',i,'device time difference',frames.timestamp-time_1,'system time difference',(time.time()-time_2)*1e3)
-                #time_1 = frames.timestamp  
-                #time_2 = time.time()
-
             frames = pipeline.wait_for_frames()
-            depth_frames_list[i] = depth_scale*np.asanyarray(frames[0].data).astype('float16')[::5, ::5] #the depth frames are in units of m       
-            timestamps[i,0] = frames.timestamp
-            timestamps[i,1] = time.time()
-            print('Frame',i,'device time difference',frames.timestamp-time_1,'system time difference',(time.time()-time_2)*1e3)
-            time_1 = frames.timestamp  
-            time_2 = time.time()
-            cv2.imshow('image',depth_frames_list[i])
+            depth_frame = frames.get_depth_frame()
+            colour_frame = frames.get_color_frame()
+            if not depth_frame or not colour_frame:
+                continue
+            
+            depth_image = np.asanyarray(depth_frame.get_data())
+            colour_image = np.asanyarray(colour_frame.get_data())
+
+            depth_colourmap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+
+            images = np.hstack((colour_image, depth_colourmap))
+
+            # depth_frames_list[i] = depth_scale*np.asanyarray(frames[0].data).astype('float16')
+            # timestamps[i,0] = frames.timestamp
+            # timestamps[i,1] = time.time()
+            # print('Frame',i,'device time difference',frames.timestamp-time_1,'system time difference',(time.time()-time_2)*1e3)
+            # time_1 = frames.timestamp  
+            # time_2 = time.time()
+            
+            # cv2.imshow('image',depth_frames_list[i])
+            cv2.imshow("RealSense", images)
             cv2.waitKey(1)
                 
             # frames = pipeline.wait_for_frames()
@@ -97,8 +106,8 @@ def grab_frames():
     finally:
         pipeline.stop()
         # TODO: ADD CUSTOM PATH
-        np.save('../data/images.npy',depth_frames_list)
-        np.save('../data/image_timestamps.npy',timestamps)
+        # np.save('../data/images.npy',depth_frames_list)
+        # np.save('../data/image_timestamps.npy',timestamps)
 #config()  
 #grab_frames()
 #%%

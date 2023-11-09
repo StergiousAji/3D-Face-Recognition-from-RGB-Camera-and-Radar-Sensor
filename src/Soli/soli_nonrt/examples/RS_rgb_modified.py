@@ -86,7 +86,7 @@ def grab_frames():
 
             images = np.hstack((colour_image, depth_colourmap))
 
-            # depth_frames_list[i] = depth_scale*np.asanyarray(frames[0].data).astype('float16')
+            # depth_frames_list[i] = depth_scale*np.asanyarray(frames[0].data).astype('float16')[::5, ::5]
             # timestamps[i,0] = frames.timestamp
             # timestamps[i,1] = time.time()
             # print('Frame',i,'device time difference',frames.timestamp-time_1,'system time difference',(time.time()-time_2)*1e3)

@@ -45,10 +45,9 @@ void PrintRadarMetadata(const SoliRadarBurst &burst)
 
 void PrintRadarData(const SoliRadarBurst &burst)
 {
-    // file < "";
     if (!burst.is_valid)
         return;
-    // ! std::cout << "-radar data:" << std::endl;
+
     file << "\"chirps\":[";
     // loop over chirps per burst e.g. 16.
     for (const SoliRadarChirp &chirp_data : burst.chirp_data)

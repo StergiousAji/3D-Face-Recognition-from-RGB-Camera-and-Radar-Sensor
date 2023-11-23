@@ -173,12 +173,10 @@ int main(int argc, char *argv[])
     file.seekp(-1, std::ios_base::cur);
     file << "]}";
 
-    file.close();
-
     return 0;
 }
 
-// int mainS(int argc, char *argv[]) {
+// int main(int argc, char *argv[]) {
 //     std::string datapath = "./data/";
 
 //     struct stat sb;
@@ -193,49 +191,9 @@ int main(int argc, char *argv[])
 //         }
 //     }
 
-//     // Priority
-//     realtime_priority(50, SCHED_RR, -10);
-
-//     // Socket part
-//     int sock = 0, valread;
-//     struct sockaddr_in serv_addr;
-//     char *hello = "Hello from soli client";
-//     char *ready = "soli ready";
-//     char *complete = "Complete";
-//     char buffer[1024] = {0};
-//     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-//     {
-//         printf("\n Socket creation error \n");
-//         return -1;
-//     }
-
-//     serv_addr.sin_family = AF_INET;
-//     serv_addr.sin_port = htons(PORT);
-//     serv_addr.sin_addr.s_addr = INADDR_ANY;
-
-//     // Convert IPv4 and IPv6 addresses from text to binary form
-//     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0)
-//     {
-//         printf("\nInvalid address/ Address not supported \n");
-//         return -1;
-//     }
-//     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-//     {
-//         printf("\nConnection Failed \n");
-//         return -1;
-//     }
-//     send(sock, hello, strlen(hello), 0);
-
 //     file.open(datapath);
 //     file << "hello";
-
-//     Soli soli;
-//     soli.RegisterBurstCallback(&BurstDataCallback);
-//     // Initialize the radar sensor with the default configuration.
-//     soli.Init();
-
 //     file.close();
 
-//     printf("DONE\n");
 //     return 0;
 // }

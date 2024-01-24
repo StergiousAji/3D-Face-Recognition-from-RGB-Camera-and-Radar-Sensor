@@ -164,7 +164,8 @@ int main(int argc, char *argv[])
     printf("Ready message sent\n");
 
     // Run for a few seconds, then stop.
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    // CHANGED TO 3s FOR PAPER
+    std::this_thread::sleep_for(std::chrono::seconds(3));
     soli.Stop();
 
     send(sock, complete, strlen(complete), 0);
